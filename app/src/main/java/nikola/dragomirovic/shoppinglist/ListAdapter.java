@@ -2,40 +2,38 @@ package nikola.dragomirovic.shoppinglist;
 
 import android.content.Context;
 import android.content.Intent;
-import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import org.json.JSONException;
-
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class ListAdapter extends BaseAdapter {
 
     private Context context;
-    private ArrayList<Item> items;
+    private ArrayList<List> lists;
     DatabaseHelper database_helper;
+    HttpHelper http_helper;
+    String username;
 
-    public ListAdapter(Context context) {
+    public ListAdapter(Context context, String username) {
         this.context = context;
-        this.items = new ArrayList<Item>();
+        this.lists = new ArrayList<List>();
+        this.username = username;
         database_helper = new DatabaseHelper(context);
+        http_helper = new HttpHelper();
     }
 
     @Override
     public int getCount() {
-        return items.size();
+        return lists.size();
     }
 
     @Override
-    public Item getItem(int position) {
-        return items.get(position);
+    public List getItem(int position) {
+        return lists.get(position);
     }
 
     @Override
@@ -43,37 +41,22 @@ public class ListAdapter extends BaseAdapter {
         return position;
     }
 
-    public void addItem(Item item) {
-        items.add(item);
+    public void addItem(List list) {
+        lists.add(list);
         notifyDataSetChanged();
     }
 
     public void removeItem(int position){
-        if (items.get(position).getShared()){
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        String deleteUrl = "http://192.168.0.27:3000/lists";
-                        String url = deleteUrl + "/" + items.get(position).getOwner() + "/" + items.get(position).getTitle();
-
-                        HttpHelper http_helper = new HttpHelper();
-                        http_helper.httpDelete(url);
-
-                    }catch (IOException | JSONException e){
-                        e.printStackTrace();
-                    }
-                }
-            });
-            thread.start();
+        if (lists.get(position).getShared()){
+        http_helper.removeList(lists.get(position).getOwner(), lists.get(position).getTitle());
         }
-        database_helper.removeList(items.get(position).getTitle());
-        items.remove(position);
+        database_helper.removeList(lists.get(position).getTitle());
+        lists.remove(position);
         notifyDataSetChanged();
     }
 
     public void clearAllItems(){
-        items.clear();
+        lists.clear();
         notifyDataSetChanged();
     }
 
@@ -112,8 +95,8 @@ public class ListAdapter extends BaseAdapter {
         convertView.setOnClickListener(view -> {
 
             Intent intent = new Intent(context, ShowListActivity.class);
-            intent.putExtra("title", items.get(position).getTitle());
-            intent.putExtra("shared", items.get(position).getShared());
+            intent.putExtra("title", lists.get(position).getTitle());
+            intent.putExtra("shared", lists.get(position).getShared());
             context.startActivity(intent);
 
         });

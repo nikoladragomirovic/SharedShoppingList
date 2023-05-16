@@ -5,17 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
-import androidx.annotation.Nullable;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -28,8 +19,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        db.execSQL("CREATE TABLE IF NOT EXISTS USERS (username TEXT PRIMARY KEY, email TEXT, password TEXT)");
-
         db.execSQL("CREATE TABLE IF NOT EXISTS LISTS (title TEXT PRIMARY KEY, creator TEXT, shared INTEGER)");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS ITEMS (id TEXT PRIMARY KEY, title TEXT, list TEXT, checked INTEGER)");
@@ -40,47 +29,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
-    public boolean registerUser(String username, String mail, String password) {
+    public ArrayList<List> loadLists(String username) {
 
-        SQLiteDatabase db = getWritableDatabase();
-
-        Cursor cursor = db.query("USERS", null, "username" + " = ?", new String[]{username}, null, null, null);
-
-        if (cursor.moveToFirst()) {
-            cursor.close();
-            db.close();
-            return false;
-
-        }
-
-        ContentValues values = new ContentValues();
-        values.put("username", username);
-        values.put("email", mail);
-        values.put("password", password);
-
-        db.insert("USERS", null, values);
-        db.close();
-        return true;
-
-    }
-
-    public boolean loginUser(String username, String password) {
-
-        SQLiteDatabase db = getReadableDatabase();
-
-        Cursor cursor = db.query("USERS", null, "username" + " = ? AND " + "password" + " = ?", new String[]{username, password}, null, null, null);
-
-        boolean result = cursor.moveToFirst();
-
-        cursor.close();
-        db.close();
-
-        return result;
-    }
-
-    public ArrayList<Item> loadLists(String username) {
-
-        ArrayList<Item> items = new ArrayList<>();
+        ArrayList<List> lists = new ArrayList<>();
 
         SQLiteDatabase db = getReadableDatabase();
 
@@ -88,19 +39,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         while (cursor.moveToNext()) {
 
-            items.add(new Item(cursor.getString(cursor.getColumnIndexOrThrow("creator")), cursor.getString(cursor.getColumnIndexOrThrow("title")), (cursor.getInt(cursor.getColumnIndexOrThrow("shared")) == 1)));
+            lists.add(new List(cursor.getString(cursor.getColumnIndexOrThrow("creator")), cursor.getString(cursor.getColumnIndexOrThrow("title")), (cursor.getInt(cursor.getColumnIndexOrThrow("shared")) == 1)));
 
         }
 
         cursor.close();
         db.close();
 
-        return items;
+        return lists;
     }
 
-    public ArrayList<Item> loadMyLists(String username) {
+    public ArrayList<List> loadMyLists(String username) {
 
-        ArrayList<Item> items = new ArrayList<>();
+        ArrayList<List> lists = new ArrayList<>();
 
         SQLiteDatabase db = getReadableDatabase();
 
@@ -108,14 +59,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         while (cursor.moveToNext()) {
 
-            items.add(new Item(cursor.getString(cursor.getColumnIndexOrThrow("creator")),cursor.getString(cursor.getColumnIndexOrThrow("title")), (cursor.getInt(cursor.getColumnIndexOrThrow("shared")) == 1)));
+            lists.add(new List(cursor.getString(cursor.getColumnIndexOrThrow("creator")),cursor.getString(cursor.getColumnIndexOrThrow("title")), (cursor.getInt(cursor.getColumnIndexOrThrow("shared")) == 1)));
 
         }
 
         cursor.close();
         db.close();
 
-        return items;
+        return lists;
     }
 
     public boolean addList(String title, String creator, int shared) {
@@ -192,13 +143,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return tasks;
     }
 
-    public void addTask(String title, String list, boolean shared) {
+    public void addTask(String title, String list, String id) {
 
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
-
-        String id = generateRandomString(5);
 
         values.put("title", title);
         values.put("list", list);
@@ -206,31 +155,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("id", id);
 
         db.insert("ITEMS", null, values);
-
-        if(shared){
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        String addTaskUrl = "http://192.168.0.27:3000/tasks";
-
-                        JSONObject task = new JSONObject();
-
-                        task.put("name", title);
-                        task.put("list", list);
-                        task.put("done", false);
-                        task.put("taskId", id);
-
-                        HttpHelper http_helper = new HttpHelper();
-                        http_helper.postJSONObjectFromURL(addTaskUrl, task);
-
-                    }catch (IOException | JSONException e){
-                        e.printStackTrace();
-                    }
-                }
-            });
-            thread.start();
-        }
 
         db.close();
 
@@ -241,34 +165,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
 
         db.delete("ITEMS", "id = ?", new String[]{id});
-
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    String http_id = null;
-
-                    HttpHelper http_helper = new HttpHelper();
-
-                    JSONArray all_tasks = http_helper.getJSONArrayFromURL("http://192.168.0.27:3000/tasks/" + owner);
-
-                    for (int i = 0; i < all_tasks.length(); i++) {
-                        JSONObject jsonObject = all_tasks.getJSONObject(i);
-
-                        if (jsonObject.getString("taskId").equals(id)){
-                            http_id = jsonObject.getString("_id");
-                            break;
-                        }
-                    }
-
-                    http_helper.httpDelete("http://192.168.0.27:3000/tasks/" + http_id);
-
-                }catch (JSONException | IOException e){
-                    e.printStackTrace();
-                }
-            }
-        });
-        thread.start();
 
         db.close();
     }
@@ -304,19 +200,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.update("ITEMS", values, "id = ?", new String[]{id});
 
         db.close();
-    }
-
-    public static String generateRandomString(int length) {
-
-        StringBuilder sb = new StringBuilder();
-
-        Random random = new Random();
-
-        for (int i = 0; i < length; i++) {
-            sb.append((char) ('a' + random.nextInt(26)));
-        }
-
-        return sb.toString();
     }
 
 }

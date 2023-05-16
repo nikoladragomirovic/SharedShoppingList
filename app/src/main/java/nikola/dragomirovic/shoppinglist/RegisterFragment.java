@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -116,7 +115,8 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                                     public void run() {
                                         Toast.makeText(getActivity().getApplicationContext(), "Username already exists!", Toast.LENGTH_SHORT).show();
                                     }
-                                }); }
+                                });
+                            }
                         } catch (IOException | JSONException e) {
                             e.printStackTrace();
                         }
@@ -124,8 +124,6 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                 });
                 thread.start();
             }
-
         }
-
     }
 }

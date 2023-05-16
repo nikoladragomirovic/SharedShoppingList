@@ -150,4 +150,95 @@ public class HttpHelper {
         urlConnection.disconnect();
         return (responseCode==SUCCESS);
     }
+
+    public void removeTask(String id, String owner){
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    String http_id = null;
+
+                    JSONArray all_tasks = getJSONArrayFromURL("http://192.168.0.27:3000/tasks/" + owner);
+
+                    for (int i = 0; i < all_tasks.length(); i++) {
+                        JSONObject jsonObject = all_tasks.getJSONObject(i);
+
+                        if (jsonObject.getString("taskId").equals(id)){
+                            http_id = jsonObject.getString("_id");
+                            break;
+                        }
+                    }
+
+                    httpDelete("http://192.168.0.27:3000/tasks/" + http_id);
+
+                }catch (JSONException | IOException e){
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+    }
+
+    public void setChecked(String id, boolean check){
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    String putUrl = "http://192.168.0.27:3000/tasks/" + id;
+                    JSONObject done = new JSONObject();
+                    done.put("done", check);
+
+                    putJSONObjectFromURL(putUrl, done);
+
+                }catch (IOException | JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+    }
+
+    public void addTask(String title, String list, String id){
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    String addTaskUrl = "http://192.168.0.27:3000/tasks";
+
+                    JSONObject task = new JSONObject();
+
+                    task.put("name", title);
+                    task.put("list", list);
+                    task.put("done", false);
+                    task.put("taskId", id);
+
+                    HttpHelper http_helper = new HttpHelper();
+                    http_helper.postJSONObjectFromURL(addTaskUrl, task);
+
+                }catch (IOException | JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+    }
+
+    public void removeList(String owner, String title){
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String deleteUrl = "http://192.168.0.27:3000/lists";
+                    String url = deleteUrl + "/" + owner + "/" + title;
+
+                    httpDelete(url);
+
+                }catch (IOException | JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+    }
+
 }

@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,7 +21,6 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 
@@ -147,10 +145,10 @@ public class NewListActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 });
                 thread.start();
-            }else if (shared == 0){
-                if(database_helper.addList(title_text.getText().toString(), username, shared)){
+            } else if (shared == 0) {
+                if (database_helper.addList(title_text.getText().toString(), username, shared)) {
                     finish();
-                }else{
+                } else {
                     Toast.makeText(getApplicationContext(), "List cannot be created!", Toast.LENGTH_SHORT).show();
                 }
             }

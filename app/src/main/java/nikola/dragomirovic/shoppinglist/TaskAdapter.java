@@ -2,7 +2,6 @@ package nikola.dragomirovic.shoppinglist;
 
 import android.content.Context;
 import android.graphics.Paint;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,24 +9,20 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
-public class ShopListAdapter extends BaseAdapter {
+public class TaskAdapter extends BaseAdapter {
 
     private Context context;
     private ArrayList<Task> tasks;
     private DatabaseHelper database_helper;
 
-    public ShopListAdapter(Context context) {
+    public TaskAdapter(Context context) {
+
         this.context = context;
         this.tasks = new ArrayList<Task>();
         database_helper =  new DatabaseHelper(context);
+
     }
 
     public void clearTasks(){
@@ -47,27 +42,11 @@ public class ShopListAdapter extends BaseAdapter {
 
     public void setCheck(int position, boolean check){
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    String putUrl = "http://192.168.0.27:3000/tasks/" + tasks.get(position).getId();
-                    JSONObject done = new JSONObject();
-                    done.put("done", check);
-
-                    HttpHelper http_helper = new HttpHelper();
-                    http_helper.putJSONObjectFromURL(putUrl,done);
-
-                }catch (IOException | JSONException e){
-                    e.printStackTrace();
-                }
-            }
-        });
-        thread.start();
-
         database_helper.setChecked(tasks.get(position).getId(), check);
+        new HttpHelper().setChecked(tasks.get(position).getId(), check);
         tasks.get(position).setCheck(check);
         notifyDataSetChanged();
+
     }
 
     @Override
@@ -78,6 +57,7 @@ public class ShopListAdapter extends BaseAdapter {
     public void removeItem(int position){
 
         database_helper.removeTask(tasks.get(position).getId(), tasks.get(position).getOwner());
+        new HttpHelper().removeTask(tasks.get(position).getId(), tasks.get(position).getOwner());
         tasks.remove(position);
         notifyDataSetChanged();
 
@@ -106,7 +86,12 @@ public class ShopListAdapter extends BaseAdapter {
 
         Task task = (Task) getItem(position);
         viewHolder.title.setText(task.getTitle());
-        viewHolder.check.setChecked(database_helper.getChecked(task.getId()));
+
+        try{
+            viewHolder.check.setChecked(database_helper.getChecked(task.getId()));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         viewHolder.check.setOnClickListener(view -> {
             setCheck(position, viewHolder.check.isChecked());
@@ -119,7 +104,7 @@ public class ShopListAdapter extends BaseAdapter {
         }
 
         convertView.setOnLongClickListener(view -> {
-            this.removeItem(position);
+            removeItem(position);
             return false;
         });
 

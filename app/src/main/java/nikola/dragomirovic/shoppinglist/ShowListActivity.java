@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,18 +23,20 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class ShowListActivity extends AppCompatActivity {
     private String title;
     private boolean shared;
     private TextView view_title;
-    private ShopListAdapter adapter;
+    private TaskAdapter adapter;
     private ListView list;
     private EditText title_form;
     private Button button_add;
     private DatabaseHelper database_helper;
     private ArrayList<Task> tasks = new ArrayList<>();
     private Button refresh;
+    private HttpHelper http_helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,8 @@ public class ShowListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_list);
 
         database_helper = new DatabaseHelper(this);
+
+        http_helper = new HttpHelper();
 
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -55,15 +58,16 @@ public class ShowListActivity extends AppCompatActivity {
         title = getIntent().getStringExtra("title");
         shared = getIntent().getBooleanExtra("shared", false);
 
-        if(shared){
+        if (shared) {
             refresh.setVisibility(View.VISIBLE);
-        }else {
+        } else {
             refresh.setVisibility(View.GONE);
         }
 
         view_title.setText(title);
 
-        adapter = new ShopListAdapter(this);
+        adapter = new TaskAdapter(this);
+
         list = findViewById(R.id.list_show_list_tasks);
         list.setAdapter(adapter);
 
@@ -72,7 +76,7 @@ public class ShowListActivity extends AppCompatActivity {
 
         tasks = database_helper.loadTasks(title);
 
-        for(int i = 0; i < tasks.size(); i++){
+        for (int i = 0; i < tasks.size(); i++) {
             adapter.addItem(tasks.get(i));
         }
 
@@ -88,15 +92,22 @@ public class ShowListActivity extends AppCompatActivity {
 
             } else {
 
-                database_helper.addTask(title_form.getText().toString(), title, shared);
+                String rand_id = generateRandomString(16);
+
+                database_helper.addTask(title_form.getText().toString(), title, rand_id);
+
+                if (shared) {
+                    http_helper.addTask(title_form.getText().toString(), title, rand_id);
+                }
 
                 tasks = database_helper.loadTasks(title);
 
                 adapter.clearTasks();
 
-                for(int i = 0; i < tasks.size(); i++){
+                for (int i = 0; i < tasks.size(); i++) {
                     adapter.addItem(tasks.get(i));
                 }
+
             }
         });
 
@@ -111,27 +122,27 @@ public class ShowListActivity extends AppCompatActivity {
                             adapter.clearTasks();
                         }
                     });
-                   try {
+                    try {
 
-                       HttpHelper http_helper = new HttpHelper();
-                       JSONArray all_tasks = http_helper.getJSONArrayFromURL("http://192.168.0.27:3000/tasks/" + title);
+                        HttpHelper http_helper = new HttpHelper();
+                        JSONArray all_tasks = http_helper.getJSONArrayFromURL("http://192.168.0.27:3000/tasks/" + title);
 
-                       for (int i = 0; i < all_tasks.length(); i++) {
-                           JSONObject jsonObject = all_tasks.getJSONObject(i);
-                           String owner = jsonObject.getString("list");
-                           boolean check = jsonObject.getBoolean("done");
-                           String taskId = jsonObject.getString("taskId");
-                           String name = jsonObject.getString("name");
-                           runOnUiThread(new Runnable() {
-                               @Override
-                               public void run() {
-                                   adapter.addItem(new Task(owner, taskId, name, check));
-                               }
-                           });
-                       }
-                   }catch (IOException | JSONException e){
-                       e.printStackTrace();
-                   }
+                        for (int i = 0; i < all_tasks.length(); i++) {
+
+                            JSONObject jsonObject = all_tasks.getJSONObject(i);
+                            boolean check = jsonObject.getBoolean("done");
+                            String taskId = jsonObject.getString("taskId");
+                            String name = jsonObject.getString("name");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    adapter.addItem(new Task(title, taskId, name, check));
+                                }
+                            });
+                        }
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
             thread.start();
@@ -140,6 +151,7 @@ public class ShowListActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         int id = item.getItemId();
         if (id == android.R.id.home) {
             // Handle the home button click
@@ -175,4 +187,16 @@ public class ShowListActivity extends AppCompatActivity {
         return super.dispatchTouchEvent(event);
 
     }
+
+    public static String generateRandomString(int length) {
+
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < length; i++) {
+            sb.append((char) ('a' + random.nextInt(26)));
+        }
+        return sb.toString();
+
+    }
+
 }

@@ -23,7 +23,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private EditText username;
     private EditText password;
     private TextView wrong;
-
     DatabaseHelper database_helper;
 
     public LoginFragment() {

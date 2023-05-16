@@ -25,10 +25,10 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private TextView username;
     private TextView new_list_button;
     private ListView list;
-    private ListAdapter adapter = new ListAdapter(this);
+    private ListAdapter adapter;
     private DatabaseHelper database_helper;
-    private ArrayList<Item> all_items = new ArrayList<>();
-    private ArrayList<Item> my_items = new ArrayList<>();
+    private ArrayList<List> all_lists = new ArrayList<>();
+    private ArrayList<List> my_lists = new ArrayList<>();
     private Button see_my_lists_button;
     private Button see_all_lists_button;
     private Button see_shared_lists_button;
@@ -45,7 +45,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         setSupportActionBar(myToolbar);
 
         list = findViewById(R.id.list_welcome_list);
-        list.setAdapter(adapter);
+
 
         new_list_button = findViewById(R.id.button_welcome_new_list);
         new_list_button.setOnClickListener(this);
@@ -67,12 +67,15 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         username.setText(saved_username);
 
+        adapter = new ListAdapter(this, saved_username);
+        list.setAdapter(adapter);
+
         database_helper = new DatabaseHelper(this);
 
-        all_items = database_helper.loadLists(saved_username);
+        all_lists = database_helper.loadLists(saved_username);
 
-        for(int i = 0; i < all_items.size(); i++){
-            adapter.addItem(all_items.get(i));
+        for(int i = 0; i < all_lists.size(); i++){
+            adapter.addItem(all_lists.get(i));
         }
     }
 
@@ -102,20 +105,20 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         }else if(view.getId() == R.id.button_welcome_see_my_lists){
 
-                my_items = database_helper.loadMyLists(saved_username);
+                my_lists = database_helper.loadMyLists(saved_username);
 
                 adapter.clearAllItems();
 
-                for (int i = 0; i < my_items.size(); i++) {
-                    adapter.addItem(my_items.get(i));
+                for (int i = 0; i < my_lists.size(); i++) {
+                    adapter.addItem(my_lists.get(i));
                 }
         }else if (view.getId() == R.id.button_welcome_see_all_lists){
-                all_items = database_helper.loadLists(saved_username);
+                all_lists = database_helper.loadLists(saved_username);
 
                 adapter.clearAllItems();
 
-                for (int i = 0; i < all_items.size(); i++){
-                    adapter.addItem(all_items.get(i));
+                for (int i = 0; i < all_lists.size(); i++){
+                    adapter.addItem(all_lists.get(i));
                 }
               }
         else if (view.getId() == R.id.button_welcome_see_shared_lists){
@@ -144,7 +147,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        adapter.addItem(new Item(saved_username, name, shared));
+                                        adapter.addItem(new List(saved_username, name, shared));
                                     }
                                 });
                             }
@@ -176,15 +179,14 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         super.onResume();
 
-        all_items = database_helper.loadLists(saved_username);
-        my_items = database_helper.loadMyLists(saved_username);
+        all_lists = database_helper.loadLists(saved_username);
+        my_lists = database_helper.loadMyLists(saved_username);
 
         adapter.clearAllItems();
 
-        for (int i = 0; i < all_items.size(); i++) {
-            adapter.addItem(all_items.get(i));
+        for (int i = 0; i < all_lists.size(); i++) {
+            adapter.addItem(all_lists.get(i));
         }
 
     }
-
 }

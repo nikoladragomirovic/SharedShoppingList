@@ -5,9 +5,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -92,8 +90,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
         } else {
-
-            super.onBackPressed();
 
         }
 

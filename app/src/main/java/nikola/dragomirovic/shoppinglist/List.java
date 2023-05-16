@@ -1,11 +1,11 @@
 package nikola.dragomirovic.shoppinglist;
 
-public class Item {
+public class List {
     private String title;
     private boolean shared;
     private String owner;
 
-    public Item(String owner, String title, boolean shared) {
+    public List(String owner, String title, boolean shared) {
         this.owner = owner;
         this.title = title;
         this.shared = shared;

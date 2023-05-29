@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -27,6 +28,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    }
+
+    public boolean queryLists(String key) {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query("LISTS", null, "title = ?", new String[]{key}, null, null, null);
+
+        boolean found = cursor.moveToFirst();
+
+        cursor.close();
+        db.close();
+
+        return found;
+    }
+
+    public boolean queryTasks(String key) {
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query("ITEMS", null, "id = ?", new String[]{key}, null, null, null);
+
+        boolean found = cursor.moveToFirst();
+
+        cursor.close();
+        db.close();
+
+        return found;
     }
 
     public ArrayList<List> loadLists(String username) {
@@ -143,7 +172,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return tasks;
     }
 
-    public void addTask(String title, String list, String id) {
+    public void addTask(String title, String list, String id, int checked) {
 
         SQLiteDatabase db = getWritableDatabase();
 
@@ -151,7 +180,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         values.put("title", title);
         values.put("list", list);
-        values.put("checked", 0);
+        values.put("checked", checked);
         values.put("id", id);
 
         db.insert("ITEMS", null, values);

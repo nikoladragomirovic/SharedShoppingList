@@ -94,7 +94,7 @@ public class ShowListActivity extends AppCompatActivity {
 
                 String rand_id = generateRandomString(16);
 
-                database_helper.addTask(title_form.getText().toString(), title, rand_id);
+                database_helper.addTask(title_form.getText().toString(), title, rand_id, 0);
 
                 if (shared) {
                     http_helper.addTask(title_form.getText().toString(), title, rand_id);

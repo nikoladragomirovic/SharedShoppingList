@@ -37,7 +37,7 @@ public class DatabaseSyncService extends Service {
                 while (running) {
                     try {
 
-                        JSONArray shared_lists = http_helper.getJSONArrayFromURL("http://192.168.0.27:3000/lists");
+                        JSONArray shared_lists = http_helper.getJSONArrayFromURL(HttpHelper.ADDRESS + "/lists");
 
                         for (int i = 0; i < shared_lists.length(); i++) {
                             JSONObject jsonObject = shared_lists.getJSONObject(i);
@@ -49,7 +49,7 @@ public class DatabaseSyncService extends Service {
                                 database_helper.addList(title, creator, shared ? 1 : 0);
                             }
 
-                            JSONArray shared_tasks = http_helper.getJSONArrayFromURL("http://192.168.0.27:3000/tasks/" + title);
+                            JSONArray shared_tasks = http_helper.getJSONArrayFromURL(HttpHelper.ADDRESS + "/tasks/" + title);
 
                             for (int j = 0; j < shared_tasks.length(); j++) {
                                 JSONObject jsonObject1 = shared_tasks.getJSONObject(j);

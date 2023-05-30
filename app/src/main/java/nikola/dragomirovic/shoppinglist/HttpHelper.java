@@ -14,6 +14,8 @@ import java.net.URL;
 public class HttpHelper {
     private static final int SUCCESS = 200;
 
+    public static final String ADDRESS = "http://172.20.10.2:3000";
+
     /*HTTP get json Array*/
     public JSONArray getJSONArrayFromURL(String urlString) throws IOException, JSONException {
         HttpURLConnection urlConnection = null;
@@ -158,7 +160,7 @@ public class HttpHelper {
                 try{
                     String http_id = null;
 
-                    JSONArray all_tasks = getJSONArrayFromURL("http://192.168.0.27:3000/tasks/" + owner);
+                    JSONArray all_tasks = getJSONArrayFromURL(HttpHelper.ADDRESS + "/tasks/" + owner);
 
                     for (int i = 0; i < all_tasks.length(); i++) {
                         JSONObject jsonObject = all_tasks.getJSONObject(i);
@@ -169,7 +171,7 @@ public class HttpHelper {
                         }
                     }
 
-                    httpDelete("http://192.168.0.27:3000/tasks/" + http_id);
+                    httpDelete(HttpHelper.ADDRESS + "/tasks/" + http_id);
 
                 }catch (JSONException | IOException e){
                     e.printStackTrace();
@@ -184,7 +186,7 @@ public class HttpHelper {
             @Override
             public void run() {
                 try{
-                    String putUrl = "http://192.168.0.27:3000/tasks/" + id;
+                    String putUrl = HttpHelper.ADDRESS + "/tasks/" + id;
                     JSONObject done = new JSONObject();
                     done.put("done", check);
 
@@ -203,7 +205,7 @@ public class HttpHelper {
             @Override
             public void run() {
                 try{
-                    String addTaskUrl = "http://192.168.0.27:3000/tasks";
+                    String addTaskUrl = HttpHelper.ADDRESS + "/tasks";
 
                     JSONObject task = new JSONObject();
 
@@ -228,7 +230,7 @@ public class HttpHelper {
             @Override
             public void run() {
                 try {
-                    String deleteUrl = "http://192.168.0.27:3000/lists";
+                    String deleteUrl = HttpHelper.ADDRESS + "/lists";
                     String url = deleteUrl + "/" + owner + "/" + title;
 
                     httpDelete(url);

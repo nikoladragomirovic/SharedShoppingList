@@ -126,7 +126,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 @Override
                 public void run() {
                     try{
-                        String getListUrl = "http://192.168.0.27:3000/lists";
+                        String getListUrl = HttpHelper.ADDRESS + "/lists";
 
                         HttpHelper http_helper = new HttpHelper();
                         JSONArray shared_lists = http_helper.getJSONArrayFromURL(getListUrl);

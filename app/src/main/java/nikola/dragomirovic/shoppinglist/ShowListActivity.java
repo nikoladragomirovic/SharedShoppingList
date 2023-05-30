@@ -125,7 +125,7 @@ public class ShowListActivity extends AppCompatActivity {
                     try {
 
                         HttpHelper http_helper = new HttpHelper();
-                        JSONArray all_tasks = http_helper.getJSONArrayFromURL("http://192.168.0.27:3000/tasks/" + title);
+                        JSONArray all_tasks = http_helper.getJSONArrayFromURL(HttpHelper.ADDRESS + "/tasks/" + title);
 
                         for (int i = 0; i < all_tasks.length(); i++) {
 

@@ -114,7 +114,7 @@ public class NewListActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void run() {
                         try {
-                            String addListUrl = "http://192.168.0.27:3000/lists";
+                            String addListUrl = HttpHelper.ADDRESS + "/lists";
                             JSONObject list = new JSONObject();
                             list.put("name", title_text.getText().toString());
                             list.put("creator", username);

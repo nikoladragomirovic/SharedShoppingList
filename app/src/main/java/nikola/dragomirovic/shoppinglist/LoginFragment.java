@@ -70,7 +70,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 @Override
                 public void run() {
                     try {
-                        String loginUrl = "http://192.168.0.27:3000/login";
+                        String loginUrl = HttpHelper.ADDRESS + "/login";
                         JSONObject userJson = new JSONObject();
                         userJson.put("username", username.getText().toString());
                         userJson.put("password", password.getText().toString());

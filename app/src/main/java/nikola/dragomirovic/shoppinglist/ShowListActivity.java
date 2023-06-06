@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -58,6 +59,8 @@ public class ShowListActivity extends AppCompatActivity {
         title = getIntent().getStringExtra("title");
         shared = getIntent().getBooleanExtra("shared", false);
 
+        Check check = new Check();
+
         if (shared) {
             refresh.setVisibility(View.VISIBLE);
         } else {
@@ -81,7 +84,7 @@ public class ShowListActivity extends AppCompatActivity {
         }
 
         button_add.setOnClickListener(view -> {
-            if (title_form.getText().toString().isEmpty()) {
+            if (check.check(title_form.getText().toString()) == 0) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("Error");

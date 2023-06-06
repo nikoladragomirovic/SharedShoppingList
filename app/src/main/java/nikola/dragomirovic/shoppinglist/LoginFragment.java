@@ -107,5 +107,4 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             thread.start();
         }
     }
-
 }

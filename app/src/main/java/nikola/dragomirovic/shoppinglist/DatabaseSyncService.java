@@ -3,6 +3,7 @@ package nikola.dragomirovic.shoppinglist;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +18,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 public class DatabaseSyncService extends Service {
-    private static final int DATABASE_CHECK_INTERVAL = 5 * 1000;
     private DatabaseHelper database_helper;
     private HttpHelper http_helper;
     private boolean running = true;
@@ -68,7 +68,7 @@ public class DatabaseSyncService extends Service {
                     }
 
                     try {
-                        Thread.sleep(DATABASE_CHECK_INTERVAL);
+                        Thread.sleep(5 * 1000);
                         sendNotification(getApplicationContext(), "ShopSync", "Shopping Lists Synced Successfully");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -98,7 +98,6 @@ public class DatabaseSyncService extends Service {
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        // Create a notification channel (required for Android Oreo and above)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
@@ -114,6 +113,7 @@ public class DatabaseSyncService extends Service {
                 .setSmallIcon(R.drawable.ic_home)
                 .setAutoCancel(true);
 
-        notificationManager.notify(0, builder.build());
+        int notificationId = (int) System.currentTimeMillis();
+        notificationManager.notify(notificationId, builder.build());
     }
 }

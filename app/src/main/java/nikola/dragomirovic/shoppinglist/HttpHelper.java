@@ -14,7 +14,7 @@ import java.net.URL;
 public class HttpHelper {
     private static final int SUCCESS = 200;
 
-    public static final String ADDRESS = "http://172.20.10.2:3000";
+    public static final String ADDRESS = "http://192.168.69.146:3000";
 
     /*HTTP get json Array*/
     public JSONArray getJSONArrayFromURL(String urlString) throws IOException, JSONException {

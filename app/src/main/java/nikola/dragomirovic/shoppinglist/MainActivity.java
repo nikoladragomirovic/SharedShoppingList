@@ -33,9 +33,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String dbFilePath = getApplicationContext().getDatabasePath("shared_list_app.db").getAbsolutePath();
         Log.d("Database Path", dbFilePath);
 
-        Intent serviceIntent = new Intent(this, DatabaseSyncService.class);
-        startService(serviceIntent);
-
     }
 
     @Override
@@ -96,6 +93,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
 
         }
-
     }
 }

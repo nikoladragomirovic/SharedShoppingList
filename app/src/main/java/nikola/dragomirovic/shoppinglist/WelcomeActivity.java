@@ -46,6 +46,8 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
 
         list = findViewById(R.id.list_welcome_list);
 
+        Intent serviceIntent = new Intent(this, DatabaseSyncService.class);
+        startService(serviceIntent);
 
         new_list_button = findViewById(R.id.button_welcome_new_list);
         new_list_button.setOnClickListener(this);
